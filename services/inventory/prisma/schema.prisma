@@ -27,9 +27,9 @@ enum ActionType {
 model History {
   id        String   @id @default(cuid())
   actionType  ActionType
-  qualityChange Int 
-  lastQuality Int
-  newQuality Int
+  quantityChanged Int 
+  lastQuantity Int
+  newQuantity Int
   inventory   Inventory @relation(fields: [inventoryId], references: [id])
   inventoryId String
   createdAt DateTime @default(now())  
