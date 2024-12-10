@@ -1,9 +1,18 @@
-import express, { NextFunction, Request, Response } from "express";
+import express, {
+  Application,
+  ErrorRequestHandler,
+  NextFunction,
+  Request,
+  Response,
+} from "express";
 import cors from "cors";
 import morgan from "morgan";
 import { PORT } from "./secret/secret";
 import "dotenv/config";
-const app = express();
+import inventoryRouter from "./routers/router";
+import { errorResponse } from "./helper/response";
+import { createError } from "./helper/import";
+const app: Application = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -16,12 +25,25 @@ app.get("/", (_req: Request, res: Response, next: NextFunction) => {
   try {
     res.status(200).json({
       code: 200,
-      message: "Server is running ",
+      message: `${service_name} is running`,
     });
   } catch (error) {
     next(error);
   }
 });
+
+app.use("/inventory", inventoryRouter);
+
+app.use((_req: Request, _res: Response, next: NextFunction) => {
+  next(createError(404, "route not found"));
+});
+
+app.use(((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  const statusCode = err.status || 500;
+  const message = err.message || "An unexpected error occurred";
+
+  errorResponse(res, { statusCode, message });
+}) as unknown as ErrorRequestHandler);
 
 app.listen(PORT, () => {
   console.log(`${service_name} is running at http://localhost:${PORT} `);
