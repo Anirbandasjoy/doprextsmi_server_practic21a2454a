@@ -11,7 +11,7 @@ import { PORT } from "./secret/secret";
 import "dotenv/config";
 import inventoryRouter from "./routers/router";
 import { createError } from "./helper/import";
-import errorMiddleware from "./middleware/globalErrorHandler";
+import { errorResponse } from "./helper/response";
 const app: Application = express();
 
 app.use(express.json());
@@ -38,14 +38,14 @@ app.use((_req: Request, _res: Response, next: NextFunction) => {
   next(createError(404, "route not found"));
 });
 
-// app.use(((err: any, _req: Request, res: Response, _next: NextFunction) => {
-// const statusCode = err.status || 500;
-// const message = err.message || "An unexpected error occurred";
-//
-// errorResponse(res, { statusCode, message, payload: err });
-// }) as unknown as ErrorRequestHandler);
+app.use(((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  const statusCode = err.status || 500;
+  const message = err.message || "An unexpected error occurred";
 
-app.use(errorMiddleware as unknown as ErrorRequestHandler);
+  errorResponse(res, { statusCode, message, payload: err });
+}) as unknown as ErrorRequestHandler);
+
+// app.use(errorMiddleware as unknown as ErrorRequestHandler);
 
 app.listen(PORT, () => {
   console.log(`${service_name} is running at http://localhost:${PORT} `);
